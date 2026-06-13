@@ -1,6 +1,31 @@
 #include <Arduino.h>
 #include <WiFi.h>
 
+const char *authModeToString(wifi_auth_mode_t mode)
+{
+  switch (mode)
+  {
+  case WIFI_AUTH_OPEN:
+    return "Open";
+  case WIFI_AUTH_WEP:
+    return "WEP";
+  case WIFI_AUTH_WPA_PSK:
+    return "WPA-PSK";
+  case WIFI_AUTH_WPA2_PSK:
+    return "WPA2-PSK";
+  case WIFI_AUTH_WPA_WPA2_PSK:
+    return "WPA/WPA2-PSK";
+  case WIFI_AUTH_WPA2_ENTERPRISE:
+    return "WPA2-Enterprise";
+  case WIFI_AUTH_WPA3_PSK:
+    return "WPA3-PSK";
+  case WIFI_AUTH_WPA2_WPA3_PSK:
+    return "WPA2/WPA3-PSK";
+  default:
+    return "Unknown";
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -28,7 +53,10 @@ void setup()
     Serial.print(" (");
     Serial.print(WiFi.RSSI(i));
     Serial.print(" dBm) ");
-    Serial.print((WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "Open" : "Secured");
+    Serial.print("Channel: ");
+    Serial.print(WiFi.channel(i));
+    Serial.print(" Security: ");
+    Serial.print(authModeToString(WiFi.encryptionType(i)));
     Serial.println();
   }
 }
