@@ -49,6 +49,8 @@ void setup()
   Serial.println("Scan complete.");
   Serial.print("Number of networks found: ");
   Serial.println(numNetworks);
+  Serial.println("#  RSSI  CH  SECURITY       SSID");
+  Serial.println("-- ----- --- -------------- ----------------");
   for (int i = 0; i < numNetworks; ++i)
   {
     String ssid = WiFi.SSID(i);
@@ -56,18 +58,7 @@ void setup()
     {
       ssid = "<hidden>";
     }
-    Serial.print("Network ");
-    Serial.print(i + 1);
-    Serial.print(": ");
-    Serial.print(ssid);
-    Serial.print(" (");
-    Serial.print(WiFi.RSSI(i));
-    Serial.print(" dBm) ");
-    Serial.print("Channel: ");
-    Serial.print(WiFi.channel(i));
-    Serial.print(" Security: ");
-    Serial.print(authModeToString(WiFi.encryptionType(i)));
-    Serial.println();
+    Serial.printf("%-3d %-5d %-3d  %-15s %s\n", i + 1, WiFi.RSSI(i), WiFi.channel(i), authModeToString(WiFi.encryptionType(i)), ssid.c_str());
   }
 }
 
