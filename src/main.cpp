@@ -35,10 +35,15 @@ void setup()
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(1000);
-  int numNetworks = WiFi.scanNetworks();
+  int numNetworks = WiFi.scanNetworks(false, true);
   if (numNetworks < 0)
   {
     Serial.println("WiFi scan failed");
+    return;
+  }
+  else if (numNetworks == 0)
+  {
+    Serial.println("No networks found.");
     return;
   }
   Serial.println("Scan complete.");
@@ -46,10 +51,15 @@ void setup()
   Serial.println(numNetworks);
   for (int i = 0; i < numNetworks; ++i)
   {
+    String ssid = WiFi.SSID(i);
+    if (ssid.length() == 0)
+    {
+      ssid = "<hidden>";
+    }
     Serial.print("Network ");
     Serial.print(i + 1);
     Serial.print(": ");
-    Serial.print(WiFi.SSID(i));
+    Serial.print(ssid);
     Serial.print(" (");
     Serial.print(WiFi.RSSI(i));
     Serial.print(" dBm) ");
