@@ -39,11 +39,13 @@ void setup()
   if (numNetworks < 0)
   {
     Serial.println("WiFi scan failed");
+    WiFi.scanDelete();
     return;
   }
   else if (numNetworks == 0)
   {
     Serial.println("No networks found.");
+    WiFi.scanDelete();
     return;
   }
   Serial.println("Scan complete.");
@@ -60,6 +62,8 @@ void setup()
     }
     Serial.printf("%-3d %-5d %-3d  %-15s %s\n", i + 1, WiFi.RSSI(i), WiFi.channel(i), authModeToString(WiFi.encryptionType(i)), ssid.c_str());
   }
+  WiFi.scanDelete();
+  Serial.println("Scan results released");
 }
 
 void loop()
