@@ -26,14 +26,9 @@ const char *authModeToString(wifi_auth_mode_t mode)
   }
 }
 
-void setup()
+void performScan()
 {
-  Serial.begin(115200);
-  Serial.println("Board starting up...");
-  delay(1000);
   Serial.println("Starting WiFi scan...");
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
   delay(1000);
   int numNetworks = WiFi.scanNetworks(false, true);
   if (numNetworks < 0)
@@ -66,7 +61,26 @@ void setup()
   Serial.println("Scan results released");
 }
 
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println("Board starting up...");
+  delay(1000);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  performScan();
+  Serial.println("Press r to scan again");
+}
+
 void loop()
 {
-  // put your main code here, to run repeatedly:
+  if (Serial.available() > 0)
+  {
+    char command = Serial.read();
+    if (command == 'r' || command == 'R')
+    {
+      performScan();
+      Serial.println("Press r to scan again");
+    }
+  }
 }
