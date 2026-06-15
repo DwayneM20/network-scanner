@@ -26,18 +26,11 @@ const char *authModeToString(wifi_auth_mode_t mode)
   }
 }
 
-void performScan()
+bool scanInProgress = false;
+
+void printScanResults(int numNetworks)
 {
-  Serial.println("Starting WiFi scan...");
-  delay(1000);
-  int numNetworks = WiFi.scanNetworks(false, true);
-  if (numNetworks < 0)
-  {
-    Serial.println("WiFi scan failed");
-    WiFi.scanDelete();
-    return;
-  }
-  else if (numNetworks == 0)
+  if (numNetworks == 0)
   {
     Serial.println("No networks found.");
     WiFi.scanDelete();
@@ -61,6 +54,27 @@ void performScan()
   Serial.println("Scan results released");
 }
 
+void startScan()
+{
+  Serial.println("Starting WiFi scan...");
+  int result = WiFi.scanNetworks(true, true);
+  if (result == WIFI_SCAN_RUNNING)
+  {
+    Serial.println("Scan started successfully.");
+    scanInProgress = true;
+  }
+  else if (result == WIFI_SCAN_FAILED)
+  {
+    Serial.println("Failed to start scan.");
+    WiFi.scanDelete();
+    scanInProgress = false;
+  }
+  else if (result >= 0)
+  {
+    printScanResults(result);
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -68,19 +82,53 @@ void setup()
   delay(1000);
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  performScan();
-  Serial.println("Press r to scan again");
+  startScan();
+  if (!scanInProgress)
+  {
+    Serial.println("Press r to scan again");
+  }
 }
 
 void loop()
 {
+  if (scanInProgress)
+  {
+    int result = WiFi.scanComplete();
+    if (result == WIFI_SCAN_RUNNING)
+    {
+    }
+    else if (result == WIFI_SCAN_FAILED)
+    {
+      Serial.println("Scan failed.");
+      WiFi.scanDelete();
+      scanInProgress = false;
+      Serial.println("Press r to scan again");
+    }
+    else if (result >= 0)
+    {
+      printScanResults(result);
+      scanInProgress = false;
+      Serial.println("Press r to scan again");
+    }
+  }
+
   if (Serial.available() > 0)
   {
     char command = Serial.read();
     if (command == 'r' || command == 'R')
     {
-      performScan();
-      Serial.println("Press r to scan again");
+      if (scanInProgress)
+      {
+        Serial.println("Scan already in progress; please wait...");
+      }
+      else
+      {
+        startScan();
+      }
+      if (!scanInProgress)
+      {
+        Serial.println("Press r to scan again");
+      }
     }
   }
 }
