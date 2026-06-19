@@ -28,6 +28,20 @@ const char *authModeToString(wifi_auth_mode_t mode)
 
 bool scanInProgress = false;
 
+const char *signalQualityLabel(int32_t rssi)
+{
+  if (rssi >= -50)
+    return "Excellent";
+  else if (rssi >= -60)
+    return "Good";
+  else if (rssi >= -70)
+    return "Fair";
+  else if (rssi >= -80)
+    return "Weak";
+  else
+    return "Very Weak";
+}
+
 void printScanResults(int numNetworks)
 {
   if (numNetworks == 0)
@@ -39,8 +53,8 @@ void printScanResults(int numNetworks)
   Serial.println("Scan complete.");
   Serial.print("Number of networks found: ");
   Serial.println(numNetworks);
-  Serial.println("#  RSSI  CH  SECURITY       SSID");
-  Serial.println("-- ----- --- -------------- ----------------");
+  Serial.println("#  RSSI   Quality  CH  SECURITY       SSID");
+  Serial.println("-- ----- ---------- --- -------------- ----------------");
   for (int i = 0; i < numNetworks; ++i)
   {
     String ssid = WiFi.SSID(i);
@@ -48,7 +62,14 @@ void printScanResults(int numNetworks)
     {
       ssid = "<hidden>";
     }
-    Serial.printf("%-3d %-5d %-3d  %-15s %s\n", i + 1, WiFi.RSSI(i), WiFi.channel(i), authModeToString(WiFi.encryptionType(i)), ssid.c_str());
+    int32_t rssi = WiFi.RSSI(i);
+    Serial.printf("%-3d %-5d %-10s %-3d %-15s %s\n",
+                  i + 1,
+                  rssi,
+                  signalQualityLabel(rssi),
+                  WiFi.channel(i),
+                  authModeToString(WiFi.encryptionType(i)),
+                  ssid.c_str());
   }
   WiFi.scanDelete();
   Serial.println("Scan results released");
