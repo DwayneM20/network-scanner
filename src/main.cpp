@@ -42,6 +42,16 @@ const char *signalQualityLabel(int32_t rssi)
     return "Very Weak";
 }
 
+const char *wifiBandLabel(int32_t channel)
+{
+  if (channel >= 1 && channel <= 14)
+    return "2.4 GHz";
+  else if (channel >= 36 && channel <= 165)
+    return "5 GHz";
+  else
+    return "Unknown Band";
+}
+
 void printScanResults(int numNetworks)
 {
   if (numNetworks == 0)
@@ -53,8 +63,8 @@ void printScanResults(int numNetworks)
   Serial.println("Scan complete.");
   Serial.print("Number of networks found: ");
   Serial.println(numNetworks);
-  Serial.println("#  RSSI   Quality  CH  SECURITY       SSID");
-  Serial.println("-- ----- ---------- --- -------------- ----------------");
+  Serial.println("#  RSSI   Quality   CH  BAND     SECURITY       BSSID              SSID");
+  Serial.println("-- ----- ---------- --- ----     -------------- ------------------ ----------------");
   for (int i = 0; i < numNetworks; ++i)
   {
     String ssid = WiFi.SSID(i);
@@ -63,12 +73,16 @@ void printScanResults(int numNetworks)
       ssid = "<hidden>";
     }
     int32_t rssi = WiFi.RSSI(i);
-    Serial.printf("%-3d %-5d %-10s %-3d %-15s %s\n",
+    int32_t channel = WiFi.channel(i);
+    String bssid = WiFi.BSSIDstr(i);
+    Serial.printf("%-3d %-5d %-10s %-3d %-8s %-15s %-17s %s\n",
                   i + 1,
                   rssi,
                   signalQualityLabel(rssi),
-                  WiFi.channel(i),
+                  channel,
+                  wifiBandLabel(channel),
                   authModeToString(WiFi.encryptionType(i)),
+                  bssid.c_str(),
                   ssid.c_str());
   }
   WiFi.scanDelete();
